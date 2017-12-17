@@ -1,0 +1,23 @@
+struct Sphere
+{
+  double radius;
+  char *color;
+};
+
+//this function should change the radius of the sphere to whatever you tell it
+void change_radius(struct Sphere *sphere, double new_radius);
+
+//this function should change the color of the sphere to whatever you tell it
+void change_color(struct Sphere *sphere, char *new_color);
+
+//this function should get the area of the given sphere.
+//the formula for area of a sphere is A = 4 * pi * (r ^ 2)
+double calculate_area(struct Sphere sphere);
+
+//this function should get the volume of the given sphere.
+//the formula for volume of a sphere is V = (4 / 3) * pi * (r ^ 3)
+double calculate_volume(struct Sphere sphere);
+
+//this function should return true if the spheres have the same radius and color, false otherwise
+//don't forget to #include <stdbool.h>
+bool are_equal(struct Sphere one, struct Sphere two);
