@@ -6,8 +6,8 @@
 #include <stdlib.h>  	//RANDOM GENERATOR
 #include <time.h>	//FUNCION TIME
 //FUNCTIONS
-char pMenu(void);
-int playAgain(void);
+void pMenu(char *opt);
+int playAgain();
 void headTails(void);
 void higherLower(void);
 
@@ -16,28 +16,26 @@ void higherLower(void);
 //      so then I can simplify the whiles on the switch statement.?
 
 
-void main()
+int main()
 {		
 	//VARs
 	char opt;
-	int end=0;
 	//MENU DISPLAY
-	opt=pMenu();
+	pMenu(&opt);
+
 	switch (opt)
 	{
 		case '1':
-			while (end!=1)
+			do
 			{
 				headTails();
-				end=playAgain();	
-			}
+			}while(playAgain());
 			break;
 		case '2':
-			while (end!=1)
+			do
 			{
 				higherLower();
-				end=playAgain();	
-			}
+			}while(playAgain());
 			break;
 		case '3':
 			exit(0); //Default exit
@@ -46,51 +44,40 @@ void main()
 			exit(1); //Wrong menu character.
 	}
 }
-
-char pMenu()
+void pMenu(char *opt)
 {
-	//VARs
-	char resp;
 	//CODE
 	printf("WELCOME. Select your option:\n\n");
 	printf("\t1.Head-Tails\n\t2.Higher-Lower\n\t3.Quit\n");
-	resp=getchar(); 
-	//reads only 1c and puts it in resp.
-	//If the user enter more it only returns the first.
-	return resp;
+	*opt = getchar(); 
+	/*
+	 *	reads only 1c and puts it in opt.
+	 *	As it is the first input read it leaves de newline char in the
+	 *	buffer. That's the reason it skipped some iterations in the for
+	 *	loop in headtais and higherlower functions. FIXED
+	 */
 
 }
 
-int playAgain()
+int playAgain()  //returns 1(TRUE) if user wants to keep playing
 {
 	//VARs
 	char fin;
 	//CODE
 	printf("\nDo you want to play again?:\t(Y)es-(N)o\n");
-	scanf("%s",&fin);
- 
+	fin = getchar();
+	if (fin == '\n'){
+		fin = getchar(); //cleaning buffer from newline char.
+	}
+
 	if (fin == 'Y' || fin == 'y')
 	{
-		return 0; 
-	}
-	else
-	{
 		return 1;
-	}	
+	}else{
 
-	/* NOTES:
-	SCANF reads a string and puts it in char 'fin'. If the user enters more
-	than one character(aka string) and error happens. 
-	Can't seem to make this work using getchar() to avoid this from happening.	  
-	If I make fin as an array[] so that it can properly hold the string I guess
-	I could make the if condition like this (fin[0]=='y')?
+		return 0;
+	}
 
-	How can I make the same process using pointers?
-	Pointer to a predefined empty array of chars?
-		char str[10];
-		char *p;
-		p=str; p=&str[0]; (EQUIVALENT?)
-	*/
 }
 
 
@@ -100,10 +87,8 @@ void headTails()
 	srand(time(NULL));
 	//VARs
 	int coin;   
-	//can I make this a char? It will only have values 0-1 but
-	//rand() seems to return an int in its doc.
 	char user;
-	int score=0;
+	int score = 0;
 	int i;
 
 	//CODE
@@ -113,24 +98,27 @@ void headTails()
 	{
 		coin=rand()%2;	//coin=0> head coin=1> tail
 
-		printf("\n\n\tTry N%i:...\n",i);
+		printf("\n\n\tTry N%d:...\n",i);
 		printf("(H)ead or (T)ail?\n");
 		
-		scanf("%s",&user);//scans response
- 
+		user = getchar();
+		if (user == '\n'){
+			user = getchar(); //cleaning buffer from newline char
+		} 		
+
 		if ((user =='H' || user =='h') && (coin == 0))
 		{
-			score+=1;
-			printf("\nNice! Your score is %d of %i.\n",score,i);
+			score += 1;
+			printf("\nNice! Your score is %d of %d.\n",score,i);
 		}
 		else if ((user =='T' || user =='t') && (coin == 1))
 		{
-			score+=1;
-			printf("\nNice! Your score is %d of %i.\n",score,i);
+			score += 1;
+			printf("\nNice! Your score is %d of %d.\n",score,i);
 		}
 		else
 		{
-			printf("\nWrong! Your score is %d of %i.\n",score,i);	
+			printf("\nWrong! Your score is %d of %d.\n",score,i);	
 		}		
 	}
 	//NOTE: Something awful happens with 'score'. It pops random ints and
@@ -139,11 +127,11 @@ void headTails()
 	
 	if (score<5)
 	{
-		printf("\n\nYOU LOSE! G A M E    O V E R.\n\a");
+		printf("\n\nYOU LOSE! G A M E    O V E R !\n\a");
 	}
 	else
 	{
-		printf("\n\nYOU WON! G A M E    O V E R.\n\a");
+		printf("\n\nYOU WON! C O N G R A T S !\n\a");
 	}	
 }
 
@@ -153,10 +141,10 @@ void higherLower()
 	srand(time(NULL));
 
 	//VARs
-	int lives=3;
+	int lives,score;
 	int nums[20];
 	char resp;
-	int i=0;
+	int i;
 
 	//CODE
 	printf("-You are given three lives. Guess correctly the output of at least half of this 20 number set.-\n");
@@ -168,42 +156,51 @@ void higherLower()
 	}
 	
 	//GAME LOOP
-	i=0; //RESET as counter.
-	while (lives>0 && i < 20)
+	i=0; 		//RESETs
+	lives = 3;
+	score = 0;
+	while (lives>0 && i < (20-1))
 	{
 		printf("This number popped up!:\t%d\n",nums[i]);
 		printf("\t(H)igher or (L)ower?:\n");
-		scanf("%s",&resp);
-		
+
+		resp = getchar();	
+		if (resp == '\n'){
+			resp = getchar(); //cleaning buffer from newlines
+		}	
+
 		if((nums[i+1] > nums[i]) && (resp == 'h' || resp == 'H'))
 		{
 			//next number is higher and user guessed correctly.
+			score++;
 			printf("\tNice. Keep going.\n");
 		}
 		else if((nums[i+1] < nums[i]) && (resp == 'l' || resp == 'L'))
 		{
 			//next number is lower and user guessed correctly.
+			score++;
 			printf("\tNice. Keep going.\n");
 		}
 		else
 		{
 			//next number is whatever and user guessed incorrectly.
-			lives-=1;
+			lives--;
 			printf("\tWrong! %d lives remaining!\n",lives);
 		}
+
 		i++;
-		//Something goes wrong with lives. It goes random on the first fail.
-		
 	}
 	//OUT OF MAIN LOOP: EITHER HE RAN OUT OF LIVES OR HE COMPLETED THE SET.
 	//REWARD
-	if (i > 10)
+	if (score > 10)
 	{
-		printf("YOU WON! Score is %d with %d lives.\n",i,lives);
+		printf("YOU WON! Score is %d out of %d with %d lives.\n"
+		,score,i,lives);
 
 	}
 	else
 	{	
-		printf("YOU LOSE! Score is %d with %d lives.\n",i,lives);
+		printf("YOU LOSE! Score is %d out of %d with %d lives.\n"
+		,score,i,lives);
 	}
 }
